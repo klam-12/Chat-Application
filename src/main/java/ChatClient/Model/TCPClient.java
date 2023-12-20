@@ -11,6 +11,7 @@ import java.util.ArrayList;
  * @author Khanh Lam
  */
 public class TCPClient {
+    private String username;
     private Socket socket;
     private BufferedReader br;
     private BufferedWriter bw;
@@ -21,7 +22,7 @@ public class TCPClient {
 
     public TCPClient(){
         try {
-            listMessages = new ArrayList<>();
+            listMessages = new ArrayList<Message>();
             socket = new Socket("localhost", 3200);
             System.out.println(socket.getPort());
 
@@ -32,13 +33,20 @@ public class TCPClient {
 
             receiver = new ClientReceiver(br);
             receiver.start();
-            receiver.setListMessages(listMessages);
             sender = new ClientSender(bw);
             sender.start();
 
         } catch (IOException io){
             System.out.println(io.getMessage());
         }
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Socket getSocket() {

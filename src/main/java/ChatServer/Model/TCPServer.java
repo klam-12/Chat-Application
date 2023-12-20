@@ -244,7 +244,17 @@ public class TCPServer {
                     clientInfo.setBr(br);
                     clientInfo.setBw(bw);
                     clientInfo.setSocket(skClient);
+
+                    ServerSender serverSender = new ServerSender();
+                    serverSender.getRoomManager().setListClients(bossManager.getListClients());
+                    serverSender.start();
+                    clientInfo.setServerSender(serverSender);
+
+                    ServerListener serverListener = new ServerListener(clientInfo,serverSender,null);
+                    serverListener.start();
+                    clientInfo.setServerListener(serverListener);
                     bossManager.addClientToList(clientInfo);
+
 
                     System.out.println("Client " + tdn + " has arrived at " + clientInfo.getSocket().getPort());
                     System.out.println("Waiting for a client");

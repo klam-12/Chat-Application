@@ -19,24 +19,45 @@ public class ChatListener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        String listChatFriends = this.clientUI.jlistOnUsersBox.getSelectedValue();
+        if(this.clientUI.strlistOnlineUsers.isEmpty()){
+            this.clientUI.chatbox.setText("Chưa có ai online để nhắn!");
+            return;
+        }
+        if (listChatFriends == null){
+            this.clientUI.chatbox.setText("Hãy chọn người để nhắn nhé!");
+            return;
+        }
         String click = e.getActionCommand();
         String message ="";
-        if(click.equals("Send")){
-            String listChatFriends = this.clientUI.jlistOnUsersBox.getSelectedValue();
-            message = this.clientUI.inputMess.getText();
+        switch (click){
+            case "Send":
 
-            // not testing yet
-            if(!message.isEmpty()){
-                Message msgContainer = this.clientUI.getClientController().findMsgContainer(listChatFriends);
-                if(msgContainer != null){
-                    // get old content and update it here
-                    String content = msgContainer.getContent();
-                    content += '\n';
-                    content += listChatFriends + ":" + message;
-                    this.clientUI.chatbox.setText(content);
+                message = this.clientUI.inputMess.getText();
+
+                if(message.equalsIgnoreCase("quit")){
                     this.clientUI.getClientController().getSender().sendMessage(message);
                 }
-            }
+                    // List chat friend: 1 person or RoomID
+                else if (!message.isEmpty()){
+                    Message msgContainer = this.clientUI.getClientController().findMsgContainer(listChatFriends);
+
+                    if(msgContainer != null){
+                        String newMsg = this.clientUI.getUsername() + ": " + message;
+                        msgContainer.addContent(newMsg);
+                        System.out.println("Send:" + newMsg);
+
+                        this.clientUI.chatbox.setText(msgContainer.getContent());
+
+                        // Send message
+                        String sentMessage = listChatFriends + "`" + message;
+                        this.clientUI.getClientController().getSender().sendMessage(sentMessage);
+                        this.clientUI.inputMess.setText("");
+                    }
+                }
+                break;
+            default:
+                System.out.println("No button choosen.");
         }
     }
 }

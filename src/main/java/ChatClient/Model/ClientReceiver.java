@@ -1,5 +1,6 @@
 package ChatClient.Model;
 
+import ChatClient.Controller.ReceiverListener;
 import utils.Message;
 
 import javax.swing.*;
@@ -17,19 +18,21 @@ public class ClientReceiver extends Thread{
     private BufferedReader br;
     private Boolean flag;
 
-    private String receivedMessage="";
-
-    private DefaultListModel<String> strlistOnlineUsers;
-    public JList<String> jlistOnUsersBox;
-
-
-    private JTextArea chatbox;
-    private ArrayList<Message> listMessages;
-
+    private String receivedMessage;
+    private ReceiverListener receiverListener;
 
     public ClientReceiver(BufferedReader br) {
         this.br = br;
         this.flag = true;
+        receivedMessage = "";
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Boolean getFlag() {
@@ -48,36 +51,12 @@ public class ClientReceiver extends Thread{
         this.receivedMessage = receivedMessage;
     }
 
-    public DefaultListModel<String> getStrlistOnlineUsers() {
-        return strlistOnlineUsers;
+    public ReceiverListener getReceiverListener() {
+        return receiverListener;
     }
 
-    public void setStrlistOnlineUsers(DefaultListModel<String> strlistOnlineUsers) {
-        this.strlistOnlineUsers = strlistOnlineUsers;
-    }
-
-    public JList<String> getJlistOnUsersBox() {
-        return jlistOnUsersBox;
-    }
-
-    public void setJlistOnUsersBox(JList<String> jlistOnUsersBox) {
-        this.jlistOnUsersBox = jlistOnUsersBox;
-    }
-
-    public JTextArea getChatbox() {
-        return chatbox;
-    }
-
-    public void setChatbox(JTextArea chatbox) {
-        this.chatbox = chatbox;
-    }
-
-    public ArrayList<Message> getListMessages() {
-        return listMessages;
-    }
-
-    public void setListMessages(ArrayList<Message> listMessages) {
-        this.listMessages = listMessages;
+    public void setReceiverListener(ReceiverListener receiverListener) {
+        this.receiverListener = receiverListener;
     }
 
     @Override
@@ -86,14 +65,10 @@ public class ClientReceiver extends Thread{
             while (flag) {
                 receivedMessage = br.readLine();
                 if(receivedMessage.contains("NewUser")){
-                    String[] list = receivedMessage.split("`");
-                    if(this.strlistOnlineUsers != null && list.length == 2){
-                        this.strlistOnlineUsers.addElement(list[1]);
-                        this.jlistOnUsersBox.setModel(strlistOnlineUsers);
-                        Message msgContainer = new Message(username,list[1],"");
-                        this.listMessages.add(msgContainer);
-                    }
-
+                    this.receiverListener.addNewUser(receivedMessage,this.username);
+                }
+                else {
+                    this.receiverListener.addNewMessage(receivedMessage);
                 }
                 System.out.println(receivedMessage);
             }

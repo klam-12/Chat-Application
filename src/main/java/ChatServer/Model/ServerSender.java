@@ -3,25 +3,37 @@ package ChatServer.Model;
 import utils.ClientInfo;
 
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * @author Khanh Lam
  */
 public class ServerSender extends Thread{
-    private Manager roomManager;
+    ArrayList<ClientInfo> listOnUsers;
+    private Manager roomManager; // chat with many people
 
     public ServerSender(Manager room){
         this.roomManager = room;
+    }
+    public ServerSender(){
+        roomManager = new Manager();
+    }
+
+    public Manager getRoomManager() {
+        return roomManager;
+    }
+
+    public void setRoomManager(Manager roomManager) {
+        this.roomManager = roomManager;
     }
 
     /**
      * Send message received from 1 user to all user in the room (except the user sent the message)
      * @param message from a user
-     * @param clientName user's name
+     * @param clientName user's name or RoomID wanted to send msg to
      */
-    public void sendMessage(String message, String clientName) {
+    public void sendMessageToRoom(String clientName , String message) {
         try {
             if (!message.isEmpty()) {
                 message = clientName + ": " + message;
@@ -41,17 +53,34 @@ public class ServerSender extends Thread{
         }
     }
 
+    public void sendMessageToAPerson(String sender, String receiver , String message){
+        ClientInfo ci = this.roomManager.findClient(receiver);
+        if (ci != null) {
+            try{
+                String sending = sender + "`" + message;
+                BufferedWriter bw = ci.getBw();
+                bw.write(sending);
+                bw.newLine();
+                bw.flush();
+            } catch (IOException io){
+                System.out.println(io.getMessage());
+            }
+        }
+    }
+
     @Override
     public void run() {
-        try {
-            do{
-                if(roomManager.getListClients().isEmpty()){
-                    break;
-                }
-            } while(true);
+        if(roomManager != null) {
+            try {
+                do {
+                    if (roomManager.getListClients().isEmpty()) {
+                        break;
+                    }
+                } while (true);
 
-        }catch (Exception e){
-            System.out.println("ServerSender: "+e.getMessage());
+            } catch (Exception e) {
+                System.out.println("ServerSender: " + e.getMessage());
+            }
         }
     }
 }

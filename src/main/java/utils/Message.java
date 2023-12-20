@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
  */
 public class Message {
     private String sender;
-    private String receiver;
+    private String receiver;  // can be name of a person or roomID
     private String content;
     private LocalDateTime timestamp;
 
@@ -48,6 +48,14 @@ public class Message {
         this.receiver = receiver;
         this.content = content;
         this.timestamp = LocalDateTime.now();
+    }
+
+    /**
+     * Add new message to previous chat
+     * @param newMsg is message sent/received with format: name: content
+     */
+    public void addContent(String newMsg){
+        this.content += '\n' + newMsg;
     }
 
     // Getters for sender, receiver, content, timestamp

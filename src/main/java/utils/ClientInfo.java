@@ -1,4 +1,7 @@
 package utils;
+import ChatServer.Model.ServerListener;
+import ChatServer.Model.ServerSender;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.net.Socket;
@@ -14,6 +17,8 @@ public class ClientInfo {
     private Socket socket;
 
     private ChatHistory chatHistory;
+    private ServerSender serverSender;
+    private ServerListener serverListener;
 
     public ClientInfo(String tdn, String password){
         this.tenTK = tdn;
@@ -73,5 +78,21 @@ public class ClientInfo {
 
     public void setChatHistory(ChatHistory chatHistory) {
         this.chatHistory = chatHistory;
+    }
+
+    public ServerSender getServerSender() {
+        return serverSender;
+    }
+
+    public void setServerSender(ServerSender serverSender) {
+        this.serverSender = serverSender;
+    }
+
+    public ServerListener getServerListener() {
+        return serverListener;
+    }
+
+    public void setServerListener(ServerListener serverListener) {
+        this.serverListener = serverListener;
     }
 }

@@ -29,16 +29,21 @@ public class ServerListener extends Thread{
                 if (receivedMessage.equalsIgnoreCase("quit")) {
                     sentMessage = "Client " + clientInf.getTenTK() + " has left !";
                     System.out.println(sentMessage);
-                    sender.sendMessage(sentMessage,clientInf.getTenTK());
+                    sender.sendMessageToRoom(sentMessage,clientInf.getTenTK());
 
                     // remove user from the room
                     roomManager.removeClientFromList(this.clientInf);
                     break;
                 }
                 else {
-                    sentMessage = clientInf.getTenTK() + ": " + receivedMessage;
-                    System.out.println(sentMessage);
-                    sender.sendMessage(sentMessage, clientInf.getTenTK());
+                    // Receive message from client A who want to send this message to client B
+                    // format of received message: name`content
+                    String[] list = receivedMessage.split("`");
+//                    sentMessage = clientInf.getTenTK() + ": " + receivedMessage;
+//                    System.out.println(sentMessage);
+//                    sender.sendMessageToRoom(list[0], list[1]);
+                    sender.sendMessageToAPerson(this.clientInf.getTenTK(),list[0],list[1]);
+
                 }
 
             }  while (true);

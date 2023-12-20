@@ -1,41 +1,40 @@
 package ChatClient.View;
 
+import ChatClient.Controller.ChatListener;
 import ChatClient.Controller.JListUsersListener;
-import ChatClient.Model.ClientReceiver;
-import ChatClient.Model.ClientSender;
+import ChatClient.Controller.ReceiverListener;
 import ChatClient.Model.TCPClient;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.*;
-import java.net.Socket;
-import java.util.ArrayList;
 
 /**
  * @author Khanh Lam
  */
 public class ClientUI extends JFrame {
+    private String username;
     private TCPClient clientController;
     public DefaultListModel<String> strlistOnlineUsers;
 
-    Font heading = new Font("Helvetica",Font.HANGING_BASELINE,15);
-    public JLabel friendName;
+    Font heading = new Font("Helvetica",Font.HANGING_BASELINE,16);
+    Font chatText = new Font("Helvetica",Font.PLAIN,14);
+    Font boldText = new Font("Helvetica",Font.BOLD,14);
+    public JLabel jLabelFriendName;
     public JTextArea chatbox;
     public JList<String> jlistOnUsersBox;
-    public JLabel username;
+    public JLabel jLabelUsername;
     public JTextField inputMess;
 
     public ClientUI(){
         clientController = new TCPClient();
         strlistOnlineUsers =  new DefaultListModel<>();
-//        strlistOnlineUsers.addElement("lem");
-//        strlistOnlineUsers.addElement("khanh");
-//        strlistOnlineUsers.addElement("capypara");
-//        strlistOnlineUsers.addElement("conan");
+        jlistOnUsersBox = new JList<>(strlistOnlineUsers);
+        jLabelFriendName = new JLabel("");
+        chatbox = new JTextArea();
+        jLabelUsername = new JLabel("");
 
-        this.clientController.getReceiver().setStrlistOnlineUsers(strlistOnlineUsers);
-        this.clientController.getReceiver().setJlistOnUsersBox(jlistOnUsersBox);
-        this.clientController.getReceiver().setChatbox(chatbox);
+        ReceiverListener receiverListener = new ReceiverListener(this);
+        this.clientController.getReceiver().setReceiverListener(receiverListener);
 
         SignInScreen signInScr = new SignInScreen(
                 this.clientController.getReceiver(),
@@ -46,6 +45,14 @@ public class ClientUI extends JFrame {
         this.setVisible(false);
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public TCPClient getClientController() {
         return clientController;
     }
@@ -54,12 +61,12 @@ public class ClientUI extends JFrame {
         this.clientController = clientController;
     }
 
-    public JLabel getUsername() {
-        return username;
+    public JLabel getjLabelUsername() {
+        return jLabelUsername;
     }
 
-    public void setUsername(JLabel username) {
-        this.username = username;
+    public void setjLabelUsername(JLabel jLabelUsername) {
+        this.jLabelUsername = jLabelUsername;
     }
 
     public void init(){
@@ -78,9 +85,7 @@ public class ClientUI extends JFrame {
     }
 
     public JPanel buildSelectionPanel(){
-
         // JList online user
-        jlistOnUsersBox = new JList<>(strlistOnlineUsers);
         JListUsersListener jlistUserListener = new JListUsersListener(this);
         jlistOnUsersBox.addListSelectionListener(jlistUserListener);
         jlistOnUsersBox.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -115,24 +120,37 @@ public class ClientUI extends JFrame {
     }
 
     public JPanel buidChatPanel(){
-        friendName = new JLabel("    Tên bạn kia", JLabel.LEFT);
-        friendName.setFont(heading);
-        
-        chatbox = new JTextArea();
+        ChatListener chatListener = new ChatListener(this);
+        jLabelFriendName = new JLabel("    Tên bạn kia", JLabel.LEFT);
+        jLabelFriendName.setFont(heading);
+
         chatbox.setEditable(false);
+        chatbox.setFont(chatText);
         // add JScrollPane to chatbox
         JScrollPane listScroller = new JScrollPane(chatbox);
         listScroller.setPreferredSize(new Dimension(100, 250));
 
-        username = new JLabel("");
         JPanel nameContainer = new JPanel(new FlowLayout());
-        nameContainer.add(username);
+        jLabelUsername.setFont(boldText);
+        nameContainer.add(jLabelUsername);
         nameContainer.setBackground(Color.pink);
-        inputMess = new JTextField(25);
 
+        // Place to input message
+        inputMess = new JTextField(25);
+        inputMess.setFont(chatText);
+
+        // All buttons nearby
         JButton btnSend = new JButton("Send");
+        btnSend.addActionListener(chatListener);
+
         JButton btnFile = new JButton("File");
+        btnFile.addActionListener(chatListener);
+
+
         JButton btnHistory = new JButton("History");
+        btnHistory.addActionListener(chatListener);
+
+        // Container
         JPanel functionPanel = new JPanel(new FlowLayout());
         functionPanel.add(nameContainer);
         functionPanel.add(inputMess);
@@ -141,10 +159,11 @@ public class ClientUI extends JFrame {
         functionPanel.add(btnHistory);
 
         JPanel chatPanel = new JPanel(new BorderLayout());
-        chatPanel.add(friendName, BorderLayout.NORTH);
+        chatPanel.add(jLabelFriendName, BorderLayout.NORTH);
         chatPanel.add(chatbox, BorderLayout.CENTER);
         chatPanel.add(functionPanel, BorderLayout.SOUTH);
 
+        // Set color
         Color chatColor = new Color(250, 240, 215);
         chatPanel.setBackground(chatColor);
         functionPanel.setBackground(chatColor);

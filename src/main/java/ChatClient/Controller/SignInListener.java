@@ -2,11 +2,13 @@ package ChatClient.Controller;
 
 import ChatClient.View.SignInScreen;
 import ChatClient.View.SignUpScreen;
+import utils.Message;
 
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -46,15 +48,20 @@ public class SignInListener implements ActionListener {
                     String msg = inScreen.getReceiver().getReceivedMessage();
                     if(msg.contains("ListOnUsers")){
                         String[] listOnUsers = msg.split("`");
+                        ArrayList<Message> listMessages = inScreen.getClientUI().getClientController().getListMessages();
                         for(int i = 1; i < listOnUsers.length; i++) {
                             inScreen.getClientUI().strlistOnlineUsers.addElement(listOnUsers[i]);
+                            Message msgContainer = new Message(tdn,listOnUsers[i],"");
+                            listMessages.add(msgContainer);
                         }
                         break;
                     }
                 }
                 inScreen.getDialog().dispose();
                 inScreen.dispose();
-                inScreen.getClientUI().getUsername().setText("Username: " + tdn);
+                inScreen.getClientUI().getjLabelUsername().setText("Username: " + tdn);
+                inScreen.getReceiver().setUsername(tdn);
+                inScreen.getClientUI().setUsername(tdn);
                 inScreen.getClientUI().setVisible(true);
             }
             else{
