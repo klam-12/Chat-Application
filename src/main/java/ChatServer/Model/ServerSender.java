@@ -29,11 +29,11 @@ public class ServerSender extends Thread{
     }
 
     /**
-     * Send message received from 1 user to all user in the room (except the user sent the message)
+     * Send message received from 1 user to all online users (except the user sent the message)
      * @param message from a user
-     * @param clientName user's name or RoomID wanted to send msg to
+     * @param clientName user's name who sent this message
      */
-    public void sendMessageToRoom(String clientName , String message) {
+    public void sendMessageToAll(String clientName , String message) {
         try {
             if (!message.isEmpty()) {
                 message = clientName + ": " + message;

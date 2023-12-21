@@ -4,9 +4,11 @@ import ChatClient.Controller.ChatListener;
 import ChatClient.Controller.JListUsersListener;
 import ChatClient.Controller.ReceiverListener;
 import ChatClient.Model.TCPClient;
+import utils.Message;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
  * @author Khanh Lam
@@ -16,18 +18,23 @@ public class ClientUI extends JFrame {
     private TCPClient clientController;
     public DefaultListModel<String> strlistOnlineUsers;
 
-    Font heading = new Font("Helvetica",Font.HANGING_BASELINE,16);
-    Font chatText = new Font("Helvetica",Font.PLAIN,14);
-    Font boldText = new Font("Helvetica",Font.BOLD,14);
+    Font heading = new Font("Helvetica", Font.HANGING_BASELINE, 16);
+    Font chatText = new Font("Helvetica", Font.PLAIN, 14);
+    Font boldText = new Font("Helvetica", Font.BOLD, 14);
     public JLabel jLabelFriendName;
     public JTextArea chatbox;
     public JList<String> jlistOnUsersBox;
     public JLabel jLabelUsername;
     public JTextField inputMess;
 
-    public ClientUI(){
+    public ClientUI() {
         clientController = new TCPClient();
-        strlistOnlineUsers =  new DefaultListModel<>();
+        strlistOnlineUsers = new DefaultListModel<>();
+
+        strlistOnlineUsers.addElement("Dooki");
+        strlistOnlineUsers.addElement("ChickenPlus");
+        strlistOnlineUsers.addElement("Crane Tea");
+
         jlistOnUsersBox = new JList<>(strlistOnlineUsers);
         jLabelFriendName = new JLabel("");
         chatbox = new JTextArea();
@@ -38,7 +45,7 @@ public class ClientUI extends JFrame {
 
         SignInScreen signInScr = new SignInScreen(
                 this.clientController.getReceiver(),
-                this.clientController.getSender(),this);
+                this.clientController.getSender(), this);
 
 
         this.init();
@@ -69,9 +76,9 @@ public class ClientUI extends JFrame {
         this.jLabelUsername = jLabelUsername;
     }
 
-    public void init(){
+    public void init() {
         this.setTitle("Chat Area");
-        this.setSize(700,600);
+        this.setSize(850, 600);
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -79,47 +86,53 @@ public class ClientUI extends JFrame {
         JPanel chatPanel = buidChatPanel();
 
         this.setLayout(new BorderLayout());
-        this.add(selectionPanel,BorderLayout.WEST);
-        this.add(chatPanel,BorderLayout.CENTER);
+        this.add(selectionPanel, BorderLayout.WEST);
+        this.add(chatPanel, BorderLayout.CENTER);
 
     }
 
-    public JPanel buildSelectionPanel(){
+    public JPanel buildSelectionPanel() {
+        Color online = new Color(140, 192, 222);
+
         // JList online user
         JListUsersListener jlistUserListener = new JListUsersListener(this);
         jlistOnUsersBox.addListSelectionListener(jlistUserListener);
-        jlistOnUsersBox.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        jlistOnUsersBox.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         jlistOnUsersBox.setLayoutOrientation(JList.VERTICAL);
         jlistOnUsersBox.setVisibleRowCount(50);
         jlistOnUsersBox.setFixedCellWidth(150);
+        jlistOnUsersBox.setFont(this.chatText);
 
 
         JScrollPane listScroller = new JScrollPane(jlistOnUsersBox);
-        listScroller.setPreferredSize(new Dimension(100, 250));
+        listScroller.setPreferredSize(new Dimension(130, 250));
 
         JLabel titleSelection = new JLabel("Online User", JLabel.CENTER);
         titleSelection.setFont(heading);
-        JButton btnChat = new JButton("Chat now");
+
+        JButton btnChat = new JButton("Chat Group");
+        btnChat.setPreferredSize(new Dimension(130, 30));
+        btnChat.setFont(boldText);
+        btnChat.setBackground(Color.white);
+        btnChat.addActionListener(jlistUserListener);
         JPanel btnChatContainer = new JPanel();
         btnChatContainer.add(btnChat);
+        btnChatContainer.setBackground(online);
 
         JPanel selectionPanel = new JPanel(new BorderLayout());
-        selectionPanel.setSize(400,600);
+        selectionPanel.setSize(130, 600);
         selectionPanel.add(titleSelection, BorderLayout.NORTH);
-        selectionPanel.add(listScroller,BorderLayout.CENTER);
-        selectionPanel.add(btnChatContainer,BorderLayout.SOUTH);
-
-        Color online = new Color(140, 192, 222);
-        btnChat.setBackground(Color.white);
-        btnChatContainer.setBackground(online);
+        selectionPanel.add(listScroller, BorderLayout.CENTER);
+        selectionPanel.add(btnChatContainer, BorderLayout.SOUTH);
         selectionPanel.setBackground(online);
+
         int border = 2;
-        selectionPanel.setBorder(BorderFactory.createEmptyBorder(0,border,0,border));
+        selectionPanel.setBorder(BorderFactory.createEmptyBorder(0, border, 0, border));
 
         return selectionPanel;
     }
 
-    public JPanel buidChatPanel(){
+    public JPanel buidChatPanel() {
         ChatListener chatListener = new ChatListener(this);
         jLabelFriendName = new JLabel("    Tên bạn kia", JLabel.LEFT);
         jLabelFriendName.setFont(heading);
@@ -168,5 +181,64 @@ public class ClientUI extends JFrame {
         chatPanel.setBackground(chatColor);
         functionPanel.setBackground(chatColor);
         return chatPanel;
+    }
+
+    public void sendMessage(String listChatFriends) {
+        String message = this.inputMess.getText();
+
+        if (message.equalsIgnoreCase("quit")) {
+            this.clientController.getSender().sendMessage(message);
+        }
+        // List chat friend: 1 person or RoomID
+        else if (!message.isEmpty()) {
+            Message msgContainer = this.clientController.findMsgContainer(listChatFriends);
+
+            if (msgContainer != null) {
+                String newMsg = this.getUsername() + ": " + message;
+                msgContainer.addContent(newMsg);
+                System.out.println("Send:" + newMsg);
+
+                this.chatbox.setText(msgContainer.getContent());
+
+                // Send message
+                String sentMessage = listChatFriends + "`" + message;
+                this.clientController.getSender().sendMessage(sentMessage);
+                this.inputMess.setText("");
+            }
+        }
+    }
+
+    public void createGroupChat(List<String> listChatFriends){
+        int numUsers = listChatFriends.size();
+        StringBuilder groupName = new StringBuilder();
+        groupName.append("[Group] ");
+        for(String value: listChatFriends) {
+            if(value.contains("[Group]")){
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Không thể tạo nhóm với nhóm có sẵn",
+                        "Warning",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            groupName.append(value);
+            if(listChatFriends.indexOf(value) != numUsers-1){
+                groupName.append(", ");
+            }
+        }
+
+        System.out.println("Chat group: " + groupName.toString());
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Bạn có muốn tạo nhóm với " + groupName.toString() + " ?",
+                "Create Chat Group",
+                JOptionPane.OK_CANCEL_OPTION);
+
+        if(choice == JOptionPane.OK_OPTION){
+            this.clientController.createGroupChat(listChatFriends,groupName.toString());
+//            this.strlistOnlineUsers.addElement(groupName.toString());
+//            this.jlistOnUsersBox.setModel(strlistOnlineUsers);
+        }
     }
 }

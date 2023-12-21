@@ -6,6 +6,7 @@ import utils.Message;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Khanh Lam
@@ -106,5 +107,24 @@ public class TCPClient {
             }
         }
         return  null;
+    }
+
+    public void createGroupChat(List<String> listChatFriends,String groupName) {
+        Message msgContainer = new Message(username,groupName,"");
+        this.listMessages.add(msgContainer);
+
+        StringBuilder createGroupInfo = new StringBuilder();
+        createGroupInfo.append("CreateGroup`");
+        int numUsers = listChatFriends.size();
+        for(String value: listChatFriends){
+            createGroupInfo.append(value);
+            if(listChatFriends.indexOf(value) != numUsers-1) {
+                createGroupInfo.append("`");
+            }
+        }
+        this.sender.sendMessage(createGroupInfo.toString());
+
+        // Receive RoomID
+
     }
 }

@@ -67,6 +67,9 @@ public class ClientReceiver extends Thread{
                 if(receivedMessage.contains("NewUser")){
                     this.receiverListener.addNewUser(receivedMessage,this.username);
                 }
+                else if(receivedMessage.contains("CreateGroup")){
+                    this.receiverListener.createGroup(receivedMessage,this.username);
+                }
                 else {
                     this.receiverListener.addNewMessage(receivedMessage);
                 }

@@ -1,5 +1,6 @@
 package ChatServer.Model;
 
+import ChatServer.Controller.GroupListener;
 import utils.ClientInfo;
 
 import java.io.*;
@@ -7,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Khanh Lam
@@ -19,6 +21,7 @@ public class TCPServer {
     int roomID; // increase everytime new room is created
     boolean flagRun;
     int TIME_OUT = 5000;
+    private GroupListener groupListener;
 
     public TCPServer(){
         try {
@@ -29,6 +32,8 @@ public class TCPServer {
         }
         bossManager = new Manager();
         listClients = new ArrayList<>();
+        groupListener = new GroupListener(this);
+
         listRooms = new ArrayList<>();
         roomID = 0;
         flagRun = true;
@@ -96,6 +101,15 @@ public class TCPServer {
         this.listRooms.add(room);
         roomID++;
     }
+
+    public TalkingThread findRoom(String roomName){
+        for(TalkingThread tt: this.listRooms){
+            if(tt.getGroupName().equals(roomName)){
+                return tt;
+            }
+        }
+        return null;
+    }
     public void removeRoom(int ID){
         this.listRooms.remove(ID);
     }
@@ -130,19 +144,23 @@ public class TCPServer {
         return null;
     }
 
-    public void createRoom(String strListUsers){
+    public void createRoom(List<String> listMembers){
         Manager roomManager = new Manager();
-        // List of users who want to chat together. Each is separated by "`"
-        String[] list = strListUsers.split("`");
+        int numUsers = listMembers.size();
+        StringBuilder groupName = new StringBuilder();
+        groupName.append("[Group] ");
 
-        int numUsers = list.length;
-        for(int i = 0; i < numUsers; i++){
-            ClientInfo client = bossManager.findClient(list[i]);
+        for(String value: listMembers){
+            groupName.append(value);
+            if(listMembers.indexOf(value) != numUsers-1){
+                groupName.append(", ");
+            }
+            ClientInfo client = bossManager.findClient(value);
             if(client != null){
                 roomManager.addClientToList(client);
             }
         }
-        TalkingThread room = new TalkingThread(roomManager,roomID);
+        TalkingThread room = new TalkingThread(roomManager,roomID,groupName.toString());
         addNewRoom(room);
         roomID++;
         room.start();
@@ -250,7 +268,7 @@ public class TCPServer {
                     serverSender.start();
                     clientInfo.setServerSender(serverSender);
 
-                    ServerListener serverListener = new ServerListener(clientInfo,serverSender,null);
+                    ServerListener serverListener = new ServerListener(clientInfo,serverSender,bossManager,groupListener);
                     serverListener.start();
                     clientInfo.setServerListener(serverListener);
                     bossManager.addClientToList(clientInfo);

@@ -29,32 +29,9 @@ public class ChatListener implements ActionListener {
             return;
         }
         String click = e.getActionCommand();
-        String message ="";
         switch (click){
             case "Send":
-
-                message = this.clientUI.inputMess.getText();
-
-                if(message.equalsIgnoreCase("quit")){
-                    this.clientUI.getClientController().getSender().sendMessage(message);
-                }
-                    // List chat friend: 1 person or RoomID
-                else if (!message.isEmpty()){
-                    Message msgContainer = this.clientUI.getClientController().findMsgContainer(listChatFriends);
-
-                    if(msgContainer != null){
-                        String newMsg = this.clientUI.getUsername() + ": " + message;
-                        msgContainer.addContent(newMsg);
-                        System.out.println("Send:" + newMsg);
-
-                        this.clientUI.chatbox.setText(msgContainer.getContent());
-
-                        // Send message
-                        String sentMessage = listChatFriends + "`" + message;
-                        this.clientUI.getClientController().getSender().sendMessage(sentMessage);
-                        this.clientUI.inputMess.setText("");
-                    }
-                }
+                this.clientUI.sendMessage(listChatFriends);
                 break;
             default:
                 System.out.println("No button choosen.");
