@@ -1,102 +1,76 @@
-// java Program to create a checkbox and ItemListener to it.
-import java.awt.event.*;
-import java.awt.*;
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
-public class solve extends JFrame implements ItemListener {
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
-    // frame
-    static JFrame f;
+public class solve extends JFrame {
+    private JTextField filename = new JTextField(), dir = new JTextField();
 
-    // label
-    static JLabel l, l1;
+    private JButton open = new JButton("Open"), save = new JButton("Save");
 
-    // checkbox
-    static JCheckBox c1, c2;
-
-    public static ImageIcon scaleImage(ImageIcon icon, int w, int h)
-    {
-        int nw = icon.getIconWidth();
-        int nh = icon.getIconHeight();
-
-        if(icon.getIconWidth() > w)
-        {
-            nw = w;
-            nh = (nw * icon.getIconHeight()) / icon.getIconWidth();
-        }
-
-        if(nh > h)
-        {
-            nh = h;
-            nw = (icon.getIconWidth() * nh) / icon.getIconHeight();
-        }
-
-        return new ImageIcon(icon.getImage().getScaledInstance(nw, nh, Image.SCALE_DEFAULT));
-    }
-
-    // main class
-    public static void main(String[] args)
-    {
-        // create a new frame
-        f = new JFrame("frame");
-
-        // create a object
-        solve s = new solve();
-
-        // set layout of frame
-        f.setLayout(new FlowLayout());
-
-        // create checkbox
-        ImageIcon user = scaleImage(new ImageIcon("user.png"),40,40);
-        c1 = new JCheckBox("user1", user, false);
-        c2 = new JCheckBox("checkbox 2", false);
-
-        // add ItemListener
-        c1.addItemListener(s);
-        c2.addItemListener(s);
-
-        // create labels
-        l = new JLabel("geeksforgeeks not selected");
-        l1 = new JLabel("checkbox2 not selected");
-
-        // set color of text
-        l.setForeground(Color.red);
-        l1.setForeground(Color.blue);
-
-        // create a new panel
+    public solve() {
         JPanel p = new JPanel();
-
-        // add checkbox to panel
-        p.add(c1);
-        p.add(c2);
-        p.add(l);
-        p.add(l1);
-
-        // add panel to frame
-        f.add(p);
-
-        // set the size of frame
-        f.setSize(600, 300);
-
-        f.show();
+        open.addActionListener(new OpenL());
+        p.add(open);
+        save.addActionListener(new SaveL());
+        p.add(save);
+        Container cp = getContentPane();
+        cp.add(p, BorderLayout.SOUTH);
+        dir.setEditable(false);
+        filename.setEditable(false);
+        p = new JPanel();
+        p.setLayout(new GridLayout(2, 1));
+        p.add(filename);
+        p.add(dir);
+        cp.add(p, BorderLayout.NORTH);
     }
 
-    public void itemStateChanged(ItemEvent e)
-    {
-        // if the state of checkbox1 is changed
-        if (e.getSource() == c1) {
-            if (e.getStateChange() == 1)
-                l.setText("geeksforgeeks selected");
-            else
-                l.setText("geeksforgeeks not selected");
-        }
-
-        // if the state of checkbox2 is changed
-        else {
-            if (e.getStateChange() == 1)
-                l1.setText("checkbox 2 selected");
-            else
-                l1.setText("checkbox 2 not selected");
+    class OpenL implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser c = new JFileChooser();
+            // Demonstrate "Open" dialog:
+            int rVal = c.showOpenDialog(solve.this);
+            if (rVal == JFileChooser.APPROVE_OPTION) {
+                filename.setText(c.getSelectedFile().getName());
+                dir.setText(c.getCurrentDirectory().toString());
+            }
+            if (rVal == JFileChooser.CANCEL_OPTION) {
+                filename.setText("You pressed cancel");
+                dir.setText("");
+            }
         }
     }
-}
+
+    class SaveL implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            JFileChooser c = new JFileChooser();
+            // Demonstrate "Save" dialog:
+            int rVal = c.showSaveDialog(solve.this);
+            if (rVal == JFileChooser.APPROVE_OPTION) {
+                filename.setText(c.getSelectedFile().getName());
+                dir.setText(c.getCurrentDirectory().toString());
+            }
+            if (rVal == JFileChooser.CANCEL_OPTION) {
+                filename.setText("You pressed cancel");
+                dir.setText("");
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        run(new solve(), 250, 110);
+    }
+
+    public static void run(JFrame frame, int width, int height) {
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(width, height);
+        frame.setVisible(true);
+    }
+} ///:~

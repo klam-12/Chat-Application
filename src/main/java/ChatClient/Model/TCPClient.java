@@ -14,8 +14,6 @@ import java.util.List;
 public class TCPClient {
     private String username;
     private Socket socket;
-    private BufferedReader br;
-    private BufferedWriter bw;
     private ClientReceiver receiver;
     private ClientSender sender;
 
@@ -28,9 +26,9 @@ public class TCPClient {
             System.out.println(socket.getPort());
 
             OutputStream os = socket.getOutputStream();
-            bw = new BufferedWriter(new OutputStreamWriter(os));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
             InputStream is = socket.getInputStream();
-            br = new BufferedReader(new InputStreamReader(is));
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
 
             receiver = new ClientReceiver(br);
             receiver.start();
@@ -56,22 +54,6 @@ public class TCPClient {
 
     public void setSocket(Socket socket) {
         this.socket = socket;
-    }
-
-    public BufferedReader getBr() {
-        return br;
-    }
-
-    public void setBr(BufferedReader br) {
-        this.br = br;
-    }
-
-    public BufferedWriter getBw() {
-        return bw;
-    }
-
-    public void setBw(BufferedWriter bw) {
-        this.bw = bw;
     }
 
     public ClientReceiver getReceiver() {
@@ -123,8 +105,17 @@ public class TCPClient {
             }
         }
         this.sender.sendMessage(createGroupInfo.toString());
+    }
 
-        // Receive RoomID
-
+    public void closeTCP(){
+        sender.sendMessage("client-quit");
+        sender.stopSender();
+        try {
+            socket.close();
+            System.out.println("CLose socket");
+        } catch (IOException e){
+            System.out.println("CLose TCP");
+            e.printStackTrace();
+        }
     }
 }

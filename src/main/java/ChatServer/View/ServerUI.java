@@ -19,7 +19,7 @@ public class ServerUI extends JFrame {
 
     public  ServerUI(){
         serverController = new TCPServer();
-//        serverController.run();
+;
         this.init();
         this.setVisible(true);
     }
@@ -45,43 +45,15 @@ public class ServerUI extends JFrame {
 
         JButton btnStart = new JButton("Start Server");
         btnStart.setFont(new Font("Helvetica",Font.PLAIN,17));
-        btnStart.addMouseListener(new MouseListener() {
+        btnStart.addActionListener(new ActionListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                serverController.run();
+            public void actionPerformed(ActionEvent e) {
+                serverController.start();
             }
         });
 
-//        JButton btnStop = new JButton("Stop Server");
-//        btnStop.setFont(new Font("Helvetica",Font.PLAIN,17));
-//        btnStop.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                serverController.setFlagRun(false);
-//            }
-//        });
-
         JPanel btnContainer = new JPanel(new FlowLayout());
         btnContainer.add(btnStart);
-//        btnContainer.add(btnStop);
 
         Color start = new Color(250, 240, 215);
         btnStart.setBackground(start);
@@ -96,12 +68,7 @@ public class ServerUI extends JFrame {
         serverController.saveToDatabase();
     }
 
-    public void stopServer(){
+    public void close() {
         serverController.stopServer();
     }
-
-//    public static void main(String arg[]) {
-//        ServerUI server = new ServerUI();
-//
-//    }
 }

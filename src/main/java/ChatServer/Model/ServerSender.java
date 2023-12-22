@@ -11,21 +11,21 @@ import java.util.ArrayList;
  */
 public class ServerSender extends Thread{
     ArrayList<ClientInfo> listOnUsers;
-    private Manager roomManager; // chat with many people
+
+    // support chat 1v1 if roomManager is bossManager
+    // support chat group if roomManger is not bossManager
+    private Manager roomManager;
 
     public ServerSender(Manager room){
         this.roomManager = room;
-    }
-    public ServerSender(){
-        roomManager = new Manager();
     }
 
     public Manager getRoomManager() {
         return roomManager;
     }
 
-    public void setRoomManager(Manager roomManager) {
-        this.roomManager = roomManager;
+    public void setRoomManager(Manager bossManager) {
+        this.roomManager = bossManager;
     }
 
     /**
@@ -53,6 +53,12 @@ public class ServerSender extends Thread{
         }
     }
 
+    /**
+     * Send message to an online user/group
+     * @param sender is who sends message
+     * @param receiver is one who receives message
+     * @param message is content
+     */
     public void sendMessageToAPerson(String sender, String receiver , String message){
         ClientInfo ci = this.roomManager.findClient(receiver);
         if (ci != null) {
@@ -68,12 +74,17 @@ public class ServerSender extends Thread{
         }
     }
 
+    public void close() {
+
+    }
+
     @Override
     public void run() {
         if(roomManager != null) {
             try {
                 do {
                     if (roomManager.getListClients().isEmpty()) {
+                        System.out.println("No more online users");
                         break;
                     }
                 } while (true);
@@ -83,4 +94,6 @@ public class ServerSender extends Thread{
             }
         }
     }
+
+
 }

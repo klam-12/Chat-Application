@@ -4,6 +4,8 @@ import ChatServer.Controller.GroupListener;
 import utils.ClientInfo;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,14 +41,15 @@ public class ServerListener extends Thread{
             String sentMessage="";
             do {
                 receivedMessage = br.readLine();
-                if (receivedMessage.equalsIgnoreCase("quit")) {
-                    sentMessage = "Client " + clientInf.getTenTK() + " has left !";
-                    System.out.println(sentMessage);
-                    sender.sendMessageToAll(sentMessage,clientInf.getTenTK());
+                if (receivedMessage.equals("client-quit")) {
+                    sender.sendMessageToAll(clientInf.getTenTK(),"client-quit");
 
-                    // remove user from the online list????
+                    // remove user from the online list
                     bossManager.removeClientFromList(this.clientInf);
-                    break;
+                    System.out.println("Client " + clientInf.getTenTK() + " has left !");
+                    clientInf.close();
+                    return;
+
                 } else if (receivedMessage.contains("CreateGroup")) {
                     // format: CreateGroup`user1`user2
                     String[] list = receivedMessage.split("`");

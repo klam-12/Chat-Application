@@ -1,6 +1,7 @@
 package ChatClient.View;
 
 import ChatClient.Controller.ChatListener;
+import ChatClient.Controller.ClientClosingListener;
 import ChatClient.Controller.JListUsersListener;
 import ChatClient.Controller.ReceiverListener;
 import ChatClient.Model.TCPClient;
@@ -29,6 +30,15 @@ public class ClientUI extends JFrame {
 
     public ClientUI() {
         clientController = new TCPClient();
+        if(clientController.getSocket() == null){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Không thể kết nối đến server",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            System.exit(0);
+        }
+
         strlistOnlineUsers = new DefaultListModel<>();
 
         strlistOnlineUsers.addElement("Dooki");
@@ -50,6 +60,7 @@ public class ClientUI extends JFrame {
 
         this.init();
         this.setVisible(false);
+
     }
 
     public String getUsername() {
@@ -80,7 +91,9 @@ public class ClientUI extends JFrame {
         this.setTitle("Chat Area");
         this.setSize(850, 600);
         this.setLocationRelativeTo(null);
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        ClientClosingListener closingListener = new ClientClosingListener(this);
+        this.addWindowListener(closingListener);
 
         JPanel selectionPanel = buildSelectionPanel();
         JPanel chatPanel = buidChatPanel();

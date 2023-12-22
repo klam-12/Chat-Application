@@ -45,7 +45,7 @@ public class ClientSender extends Thread{
         try {
             bw.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 

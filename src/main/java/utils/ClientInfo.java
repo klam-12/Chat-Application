@@ -4,6 +4,7 @@ import ChatServer.Model.ServerSender;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.net.Socket;
 
 /**
@@ -94,5 +95,15 @@ public class ClientInfo {
 
     public void setServerListener(ServerListener serverListener) {
         this.serverListener = serverListener;
+    }
+
+    public void close() {
+        try{
+            br.close();
+            bw.close();
+            socket.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 }

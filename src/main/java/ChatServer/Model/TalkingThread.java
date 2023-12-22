@@ -11,6 +11,7 @@ import java.io.IOException;
 public class TalkingThread extends Thread{
     private Manager roomManager;
     private String groupName;
+    private ServerSender sender;
 
     int ID;
 
@@ -71,7 +72,7 @@ public class TalkingThread extends Thread{
 
     @Override
     public void run() {
-        ServerSender sender = new ServerSender(roomManager);
+        sender = new ServerSender(roomManager);
         sender.start();
 
         StringBuilder createGroupInform = new StringBuilder();
@@ -84,10 +85,11 @@ public class TalkingThread extends Thread{
             }
         }
 
+        // Send notification to users in group chat, including the one who creates the group
         for(int i = 0; i < this.roomManager.getListClients().size(); i++){
-            String receiveName = roomManager.getListClients().get(i).getTenTK();
+            String receiveUser = roomManager.getListClients().get(i).getTenTK();
             // "s" stands for server
-            sender.sendMessageToAPerson("s", receiveName,createGroupInform.toString());
+            sender.sendMessageToAPerson("s", receiveUser,createGroupInform.toString());
         }
 
     }

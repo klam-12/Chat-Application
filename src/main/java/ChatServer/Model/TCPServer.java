@@ -6,14 +6,14 @@ import utils.ClientInfo;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.time.LocalDateTime;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Khanh Lam
  */
-public class TCPServer {
+public class TCPServer extends Thread {
     private ServerSocket serSoc; // server socket
     private Manager bossManager; // contains curent-online users
     private ArrayList<ClientInfo> listClients; // clients who have signed in at least once
@@ -176,18 +176,18 @@ public class TCPServer {
     }
 
     public void stopServer() {
-
+        this.saveToDatabase();
         int size = this.bossManager.getListClients().size();
         ArrayList<ClientInfo> listOnlineUsers = this.bossManager.getListClients();
         for(int i = 0; i < size; i++){
-            try {
-                listOnlineUsers.get(i).getBw().close();
-                listOnlineUsers.get(i).getBr().close();
-                listOnlineUsers.get(i).getSocket().close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            listOnlineUsers.get(i).close();
         }
+
+        // remove rooms
+//        int numRooms = this.listRooms.size();
+//        for(int i = 0; i < numRooms; i++){
+//            this.listRooms.remove(i);
+//        }
 
         try {
             this.serSoc.close();
@@ -195,6 +195,7 @@ public class TCPServer {
         } catch (IOException ie){
             System.out.println(ie.getMessage());
         }
+
     }
 
     public void handleComingUser(Socket skClient){
@@ -263,8 +264,7 @@ public class TCPServer {
                     clientInfo.setBw(bw);
                     clientInfo.setSocket(skClient);
 
-                    ServerSender serverSender = new ServerSender();
-                    serverSender.getRoomManager().setListClients(bossManager.getListClients());
+                    ServerSender serverSender = new ServerSender(bossManager);
                     serverSender.start();
                     clientInfo.setServerSender(serverSender);
 
@@ -296,8 +296,8 @@ public class TCPServer {
             System.out.println("Waiting for a client: " + ie.getMessage());
         }
     }
-
-    public void run(){
+    @Override
+    public void run() {
         System.out.println("Waiting for a client");
         try
         {
@@ -305,6 +305,9 @@ public class TCPServer {
                 try {
                     Socket skClient = serSoc.accept(); //synchronous
                     handleComingUser(skClient);
+                }
+                catch (SocketException se){
+                    break;
                 }
                 catch (java.io.InterruptedIOException e) {
                     removeEmptyRooms();
@@ -317,8 +320,7 @@ public class TCPServer {
             while (true);
 
         }
-        catch(IOException e)
-        {
+        catch(IOException e) {
             System.out.println("There're some error: " + e.getMessage());
         }
     }

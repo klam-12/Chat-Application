@@ -5,9 +5,11 @@ import utils.Message;
 
 import javax.swing.*;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 /**
@@ -16,14 +18,12 @@ import java.util.ArrayList;
 public class ClientReceiver extends Thread{
     private String username;
     private BufferedReader br;
-    private Boolean flag;
 
     private String receivedMessage;
     private ReceiverListener receiverListener;
 
     public ClientReceiver(BufferedReader br) {
         this.br = br;
-        this.flag = true;
         receivedMessage = "";
     }
 
@@ -33,14 +33,6 @@ public class ClientReceiver extends Thread{
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public Boolean getFlag() {
-        return flag;
-    }
-
-    public void setFlag(Boolean flag) {
-        this.flag = flag;
     }
 
     public String getReceivedMessage() {
@@ -62,7 +54,7 @@ public class ClientReceiver extends Thread{
     @Override
     public void run() {
         try{
-            while (flag) {
+            while (true) {
                 receivedMessage = br.readLine();
                 if(receivedMessage.contains("NewUser")){
                     this.receiverListener.addNewUser(receivedMessage,this.username);
@@ -70,14 +62,28 @@ public class ClientReceiver extends Thread{
                 else if(receivedMessage.contains("CreateGroup")){
                     this.receiverListener.createGroup(receivedMessage,this.username);
                 }
+                else if(receivedMessage.contains("client-quit")){
+                    // remove from jlist online users
+                    this.receiverListener.removeUser(receivedMessage);
+                }
                 else {
                     this.receiverListener.addNewMessage(receivedMessage);
                 }
                 System.out.println(receivedMessage);
             }
-            br.close();
+//            System.out.println("Stop client receiver");
+//            br.close();
+        } catch (SocketException se){
+            try {
+                br.close();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
         } catch (Exception e){
-            System.out.println(e.getMessage());
+            System.out.println("Client receiver");
+            e.printStackTrace();
         }
     }
+
+
 }

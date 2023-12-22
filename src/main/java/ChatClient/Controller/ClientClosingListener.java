@@ -1,5 +1,6 @@
-package ChatServer.Controller;
+package ChatClient.Controller;
 
+import ChatClient.View.ClientUI;
 import ChatServer.View.ServerUI;
 
 import java.awt.event.WindowEvent;
@@ -8,11 +9,11 @@ import java.awt.event.WindowListener;
 /**
  * @author Khanh Lam
  */
-public class ServerClosingListener implements WindowListener {
-    ServerUI serverUI;
+public class ClientClosingListener implements WindowListener {
+    ClientUI clientUI;
 
-    public ServerClosingListener(ServerUI ser){
-        this.serverUI = ser;
+    public ClientClosingListener(ClientUI clUI){
+        this.clientUI = clUI;
     }
     @Override
     public void windowOpened(WindowEvent e) {
@@ -21,13 +22,12 @@ public class ServerClosingListener implements WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
-        serverUI.close();
-        serverUI.saveToDatabase();
+        clientUI.getClientController().closeTCP();
     }
 
     @Override
     public void windowClosed(WindowEvent e) {
-        this.serverUI.dispose();
+        this.clientUI.dispose();
         System.exit(0);
     }
 

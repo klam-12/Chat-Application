@@ -76,4 +76,11 @@ public class ReceiverListener {
         this.clientUI.strlistOnlineUsers.addElement(groupName.toString());
         this.clientUI.jlistOnUsersBox.setModel(this.clientUI.strlistOnlineUsers);
     }
+
+    public void removeUser(String receivedMessage) {
+        //format: user: client-quit
+        String[] list = receivedMessage.split(":");
+        this.clientUI.strlistOnlineUsers.removeElement(list[0]);
+        this.clientUI.jlistOnUsersBox.setModel(this.clientUI.strlistOnlineUsers);
+    }
 }
