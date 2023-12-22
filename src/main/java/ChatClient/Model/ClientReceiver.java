@@ -61,8 +61,9 @@ public class ClientReceiver extends Thread{
                 }
                 else if(receivedMessage.contains("CreateGroup")){
                     this.receiverListener.createGroup(receivedMessage,this.username);
-                }
-                else if(receivedMessage.contains("client-quit")){
+                } else if (receivedMessage.contains("SendFile")) {
+                    this.receiverListener.receiveFile(receivedMessage);
+                } else if(receivedMessage.contains("client-quit")){
                     // remove from jlist online users
                     this.receiverListener.removeUser(receivedMessage);
                 }

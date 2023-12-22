@@ -33,6 +33,9 @@ public class ChatListener implements ActionListener {
             case "Send":
                 this.clientUI.sendMessage(listChatFriends);
                 break;
+            case "File":
+                this.clientUI.sendFile(listChatFriends);
+                break;
             default:
                 System.out.println("No button choosen.");
         }

@@ -3,9 +3,7 @@ package ChatServer.Model;
 import ChatServer.Controller.GroupListener;
 import utils.ClientInfo;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +63,29 @@ public class ServerListener extends Thread{
                     TalkingThread room = groupListener.findRoom(list[0]);
                     room.sendMessageToRoom(this.clientInf.getTenTK(),list[1]);
 
-                } else {
+                } else if (receivedMessage.contains("SendFile")) {
+                    // format: SendFile`receiver`totalByte`filename
+                    String[] list = receivedMessage.split("`");
+                    InputStream fileInputStream = this.clientInf.getSocket().getInputStream();
+                    FileOutputStream fileOutputStream = new FileOutputStream(list[3]);
+
+                    byte[] buffer = new byte[1024];
+                    int bytesRead;
+                    long totalByte = Long.parseLong(list[2]);
+                    long receiveByte = 0;
+
+                    while ((bytesRead = fileInputStream.read(buffer)) > 0) {
+                        fileOutputStream.write(buffer, 0, bytesRead);
+                        receiveByte += bytesRead;
+                        if (receiveByte >= totalByte)
+                            break;
+                    }
+                    fileOutputStream.close();
+                    System.out.println("File received from Client A");
+                    this.sender.sendFileToAPerson(this.clientInf.getTenTK(),list[1],list[3]);
+
+                }
+                else {
                     // Receive message from client A who want to send this message to client B
                     // format of received message: name`content
                     String[] list = receivedMessage.split("`");

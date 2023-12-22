@@ -1,14 +1,12 @@
 package ChatClient.View;
 
-import ChatClient.Controller.ChatListener;
-import ChatClient.Controller.ClientClosingListener;
-import ChatClient.Controller.JListUsersListener;
-import ChatClient.Controller.ReceiverListener;
+import ChatClient.Controller.*;
 import ChatClient.Model.TCPClient;
 import utils.Message;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -17,16 +15,20 @@ import java.util.List;
 public class ClientUI extends JFrame {
     private String username;
     private TCPClient clientController;
-    public DefaultListModel<String> strlistOnlineUsers;
 
     Font heading = new Font("Helvetica", Font.HANGING_BASELINE, 16);
     Font chatText = new Font("Helvetica", Font.PLAIN, 14);
     Font boldText = new Font("Helvetica", Font.BOLD, 14);
     public JLabel jLabelFriendName;
     public JTextArea chatbox;
+    public DefaultListModel<String> strlistOnlineUsers;
     public JList<String> jlistOnUsersBox;
+    public DefaultListModel<String> strlistFiles;
+
+    public JList<String> jlistFilesBox;
     public JLabel jLabelUsername;
     public JTextField inputMess;
+    private JPanel fileContainer;
 
     public ClientUI() {
         clientController = new TCPClient();
@@ -40,7 +42,6 @@ public class ClientUI extends JFrame {
         }
 
         strlistOnlineUsers = new DefaultListModel<>();
-
         strlistOnlineUsers.addElement("Dooki");
         strlistOnlineUsers.addElement("ChickenPlus");
         strlistOnlineUsers.addElement("Crane Tea");
@@ -49,6 +50,13 @@ public class ClientUI extends JFrame {
         jLabelFriendName = new JLabel("");
         chatbox = new JTextArea();
         jLabelUsername = new JLabel("");
+
+        strlistFiles = new DefaultListModel<>();
+        strlistFiles.addElement("test.txt");
+        strlistFiles.addElement("file.txt");
+        strlistFiles.addElement("tea.jpg");
+        jlistFilesBox = new JList<>(strlistFiles);
+
 
         ReceiverListener receiverListener = new ReceiverListener(this);
         this.clientController.getReceiver().setReceiverListener(receiverListener);
@@ -95,16 +103,51 @@ public class ClientUI extends JFrame {
         ClientClosingListener closingListener = new ClientClosingListener(this);
         this.addWindowListener(closingListener);
 
-        JPanel selectionPanel = buildSelectionPanel();
+        JPanel usersPanel = buildUserPanel();
         JPanel chatPanel = buidChatPanel();
+        JPanel FilePanel = buildFilePanel();
+
+        JPanel choicesPanel = new JPanel(new BorderLayout());
+        choicesPanel.add(usersPanel,BorderLayout.NORTH);
+        choicesPanel.add(FilePanel,BorderLayout.SOUTH);
+
 
         this.setLayout(new BorderLayout());
-        this.add(selectionPanel, BorderLayout.WEST);
+        this.add(choicesPanel, BorderLayout.WEST);
         this.add(chatPanel, BorderLayout.CENTER);
 
     }
 
-    public JPanel buildSelectionPanel() {
+    private JPanel buildFilePanel() {
+        Color online = new Color(161, 238, 189);
+
+        // JList files received
+        jlistFilesBox.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        jlistFilesBox.setLayoutOrientation(JList.VERTICAL);
+        jlistFilesBox.setVisibleRowCount(50);
+        jlistFilesBox.setFixedCellWidth(150);
+        jlistFilesBox.setFont(this.chatText);
+
+
+        JScrollPane listScroller = new JScrollPane(jlistFilesBox);
+        listScroller.setPreferredSize(new Dimension(130, 180));
+
+        JLabel titleSelection = new JLabel("Files nhận", JLabel.CENTER);
+        titleSelection.setFont(heading);
+
+        JPanel filePanel = new JPanel(new BorderLayout());
+        filePanel.setSize(130, 600);
+        filePanel.add(titleSelection, BorderLayout.NORTH);
+        filePanel.add(listScroller, BorderLayout.CENTER);
+        filePanel.setBackground(online);
+
+        int border = 5;
+        filePanel.setBorder(BorderFactory.createEmptyBorder(0, border, 0, border));
+
+        return filePanel;
+    }
+
+    public JPanel buildUserPanel() {
         Color online = new Color(140, 192, 222);
 
         // JList online user
@@ -118,7 +161,7 @@ public class ClientUI extends JFrame {
 
 
         JScrollPane listScroller = new JScrollPane(jlistOnUsersBox);
-        listScroller.setPreferredSize(new Dimension(130, 250));
+        listScroller.setPreferredSize(new Dimension(130, 280));
 
         JLabel titleSelection = new JLabel("Online User", JLabel.CENTER);
         titleSelection.setFont(heading);
@@ -139,7 +182,7 @@ public class ClientUI extends JFrame {
         selectionPanel.add(btnChatContainer, BorderLayout.SOUTH);
         selectionPanel.setBackground(online);
 
-        int border = 2;
+        int border = 5;
         selectionPanel.setBorder(BorderFactory.createEmptyBorder(0, border, 0, border));
 
         return selectionPanel;
@@ -250,8 +293,72 @@ public class ClientUI extends JFrame {
 
         if(choice == JOptionPane.OK_OPTION){
             this.clientController.createGroupChat(listChatFriends,groupName.toString());
-//            this.strlistOnlineUsers.addElement(groupName.toString());
-//            this.jlistOnUsersBox.setModel(strlistOnlineUsers);
         }
+    }
+
+    public void sendFile(String receiverName) {
+        JFileChooser fc = new JFileChooser();
+        int rVal = fc.showOpenDialog(this);
+        if (rVal == JFileChooser.APPROVE_OPTION) {
+            File currentDirectory = fc.getCurrentDirectory();
+            File selectedFile = fc.getSelectedFile();
+
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    "Gửi file " + selectedFile.toString(),
+                    "Confirm to send file",
+                    JOptionPane.OK_CANCEL_OPTION);
+
+            if(choice == JOptionPane.OK_OPTION){
+                Message msgContainer = this.clientController.findMsgContainer(receiverName);
+
+                if (msgContainer != null) {
+                    String newMsg = this.getUsername() + ": Gửi file " + selectedFile.getName() ;
+                    msgContainer.addContent(newMsg);
+                    this.chatbox.setText(msgContainer.getContent());
+//                    // Update online users frame
+//                    this.strlistFiles.addElement(groupName.toString());
+//                    this.jlistOnUsersBox.setModel(this.clientUI.strlistOnlineUsers);
+                }
+                this.clientController.sendFileToUser(selectedFile,receiverName);
+
+            }
+
+        }
+/*        if (rVal == JFileChooser.CANCEL_OPTION) {
+            filename.setText("You pressed cancel");
+            dir.setText("");
+        }*/
+
+    }
+
+    public String saveFileReceived(String filename) {
+        JOptionPane.showConfirmDialog(
+                this,
+                "Bạn vừa nhận được file " + filename + ". Hãy bấm OK để chọn nơi lưu",
+                "Thông báo nhận file",
+                JOptionPane.DEFAULT_OPTION);
+
+        File file = new File(filename);
+        JFileChooser c = new JFileChooser();
+        c.setSelectedFile(file);
+
+        // Demonstrate "Save" dialog:
+        int rVal = c.showSaveDialog(this);
+        if (rVal == JFileChooser.APPROVE_OPTION) {
+            File currentDirectory = c.getCurrentDirectory();
+
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    "Lưu file ở " + currentDirectory.toString(),
+                    "Confirm to save file",
+                    JOptionPane.OK_CANCEL_OPTION);
+
+            if(choice == JOptionPane.OK_OPTION){
+                return currentDirectory.toString();
+            }
+
+        }
+    return null;
     }
 }

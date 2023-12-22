@@ -3,6 +3,7 @@ package ChatClient.Model;
 import ChatServer.Model.TCPServer;
 import utils.Message;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,7 +20,7 @@ public class TCPClient {
 
     private ArrayList<Message> listMessages;
 
-    public TCPClient(){
+    public TCPClient() {
         try {
             listMessages = new ArrayList<Message>();
             socket = new Socket("localhost", 3200);
@@ -35,7 +36,7 @@ public class TCPClient {
             sender = new ClientSender(bw);
             sender.start();
 
-        } catch (IOException io){
+        } catch (IOException io) {
             System.out.println(io.getMessage());
         }
     }
@@ -80,42 +81,74 @@ public class TCPClient {
         this.listMessages = listMessages;
     }
 
-    public Message findMsgContainer(String userReceived){
+    public Message findMsgContainer(String userReceived) {
         int size = this.listMessages.size();
-        for(int i = 0; i < size; i++){
+        for (int i = 0; i < size; i++) {
             String cr = this.listMessages.get(i).getReceiver();
-            if(cr.equals(userReceived)){
+            if (cr.equals(userReceived)) {
                 return this.listMessages.get(i);
             }
         }
-        return  null;
+        return null;
     }
 
-    public void createGroupChat(List<String> listChatFriends,String groupName) {
-        Message msgContainer = new Message(username,groupName,"");
+    public void createGroupChat(List<String> listChatFriends, String groupName) {
+        Message msgContainer = new Message(username, groupName, "");
         this.listMessages.add(msgContainer);
 
         StringBuilder createGroupInfo = new StringBuilder();
         createGroupInfo.append("CreateGroup`");
         int numUsers = listChatFriends.size();
-        for(String value: listChatFriends){
+        for (String value : listChatFriends) {
             createGroupInfo.append(value);
-            if(listChatFriends.indexOf(value) != numUsers-1) {
+            if (listChatFriends.indexOf(value) != numUsers - 1) {
                 createGroupInfo.append("`");
             }
         }
         this.sender.sendMessage(createGroupInfo.toString());
     }
 
-    public void closeTCP(){
+    public void closeTCP() {
         sender.sendMessage("client-quit");
         sender.stopSender();
         try {
             socket.close();
             System.out.println("CLose socket");
-        } catch (IOException e){
+        } catch (IOException e) {
             System.out.println("CLose TCP");
             e.printStackTrace();
+        }
+    }
+
+    public void sendFileToUser(File selectedFile, String receiverName) {
+        if (!selectedFile.exists()) {
+            System.out.println("File not found");
+            return;
+        }
+        System.out.println("File found");
+        String[] listDir = selectedFile.toString().split("\\\\");
+
+        try {
+        // Send file to the server
+        OutputStream fileOutputStream = socket.getOutputStream();
+//        File fileToSend = new File("test.txt"); // Replace file_to_send.txt with the actual file path
+        FileInputStream fileInputStream = new FileInputStream(selectedFile);
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        long totalBytes = selectedFile.length();
+        this.sender.sendMessage("SendFile`" + receiverName + "`" + totalBytes + "`" + selectedFile.getName());
+
+        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+            fileOutputStream.write(buffer, 0, bytesRead);
+        }
+        System.out.println("File sent to the server.");
+
+        // Close resources
+        fileInputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 }

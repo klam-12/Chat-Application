@@ -2,8 +2,7 @@ package ChatServer.Model;
 
 import utils.ClientInfo;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -74,6 +73,41 @@ public class ServerSender extends Thread{
         }
     }
 
+    public void sendFileToAPerson(String sender, String receiver, String filename) {
+        ClientInfo ci = this.roomManager.findClient(receiver);
+        if (ci != null) {
+            try {
+                File fileToSend = new File(filename);
+                long totalByte = fileToSend.length();
+                String sending = "SendFile`" +  sender + "`" + totalByte + "`" + filename;
+                BufferedWriter bw = ci.getBw();
+                bw.write(sending);
+                bw.newLine();
+                bw.flush();
+
+                try {
+                    OutputStream fileToClientB = ci.getSocket().getOutputStream();
+                    FileInputStream fileInputStreamToSend = new FileInputStream(fileToSend);
+                    int bytesRead;
+                    byte[] buffer = new byte[1024];
+                    while ((bytesRead = fileInputStreamToSend.read(buffer)) != -1) {
+                        fileToClientB.write(buffer, 0, bytesRead);
+                    }
+                    System.out.println("File sent to Client B.");
+
+                    fileInputStreamToSend.close();
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+
+            }catch (IOException io){
+                System.out.println(io.getMessage());
+            }
+        }
+    }
+
     public void close() {
 
     }
@@ -94,6 +128,7 @@ public class ServerSender extends Thread{
             }
         }
     }
+
 
 
 }
