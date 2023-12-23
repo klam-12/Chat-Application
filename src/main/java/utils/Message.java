@@ -55,9 +55,7 @@ public class Message {
      * @param newMsg is message sent/received with format: name: content
      */
     public void addContent(String newMsg){
-        this.content += '\n' + newMsg;
+        this.content +=  newMsg + '\n';
     }
 
-    // Getters for sender, receiver, content, timestamp
-    // ...
 }

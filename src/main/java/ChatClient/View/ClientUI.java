@@ -2,6 +2,7 @@ package ChatClient.View;
 
 import ChatClient.Controller.*;
 import ChatClient.Model.TCPClient;
+import utils.ChatHistory;
 import utils.Message;
 
 import javax.swing.*;
@@ -42,9 +43,6 @@ public class ClientUI extends JFrame {
         }
 
         strlistOnlineUsers = new DefaultListModel<>();
-        strlistOnlineUsers.addElement("Dooki");
-        strlistOnlineUsers.addElement("ChickenPlus");
-        strlistOnlineUsers.addElement("Crane Tea");
 
         jlistOnUsersBox = new JList<>(strlistOnlineUsers);
         jLabelFriendName = new JLabel("");
@@ -52,9 +50,6 @@ public class ClientUI extends JFrame {
         jLabelUsername = new JLabel("");
 
         strlistFiles = new DefaultListModel<>();
-        strlistFiles.addElement("test.txt");
-        strlistFiles.addElement("file.txt");
-        strlistFiles.addElement("tea.jpg");
         jlistFilesBox = new JList<>(strlistFiles);
 
 
@@ -316,19 +311,12 @@ public class ClientUI extends JFrame {
                     String newMsg = this.getUsername() + ": Gửi file " + selectedFile.getName() ;
                     msgContainer.addContent(newMsg);
                     this.chatbox.setText(msgContainer.getContent());
-//                    // Update online users frame
-//                    this.strlistFiles.addElement(groupName.toString());
-//                    this.jlistOnUsersBox.setModel(this.clientUI.strlistOnlineUsers);
                 }
                 this.clientController.sendFileToUser(selectedFile,receiverName);
 
             }
 
         }
-/*        if (rVal == JFileChooser.CANCEL_OPTION) {
-            filename.setText("You pressed cancel");
-            dir.setText("");
-        }*/
 
     }
 

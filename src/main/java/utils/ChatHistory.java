@@ -11,34 +11,81 @@ import java.util.List;
  */
 public class ChatHistory {
     private String user;
+    private List<Message> listMsgPool;
     private File chatFile;
 
-    public ChatHistory(String user) {
+    public ChatHistory(String user,String dirPath) {
         this.user = user;
-        this.chatFile = new File(user + "_chat_history.txt");
+        this.readChatFile(dirPath);
+    }
+
+    public List<Message> getListMsgPool() {
+        return listMsgPool;
+    }
+
+    public void setListMsgPool(List<Message> listMsgPool) {
+        this.listMsgPool = listMsgPool;
+    }
+
+    public File getChatFile() {
+        return chatFile;
+    }
+
+    public void setChatFile(File chatFile) {
+        this.chatFile = chatFile;
+    }
+
+    public void readChatFile(String dirPath){
+        this.chatFile = new File(dirPath);
         if (!chatFile.exists()) {
             try {
+                listMsgPool = new ArrayList<>();
                 chatFile.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else{
+            this.listMsgPool = getMessages();
         }
     }
 
-    public void addMessage(Message message) {
-        try (FileWriter fileWriter = new FileWriter(chatFile, true);
-             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-             PrintWriter printWriter = new PrintWriter(bufferedWriter)) {
-
-            printWriter.println(
-                    message.getSender() + "|" +
-                            message.getReceiver() + "|" +
-                            message.getContent() + "|" +
-                            message.getTimestamp()
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
+    /**
+     * File format:
+     * sender|receiver|content1`content2`...|timestamp\n
+     */
+    public void saveChatFile(){
+        try (BufferedWriter br = new BufferedWriter(new FileWriter(chatFile))) {
+            int total = this.listMsgPool.size();
+            for(int i = 0; i < total; i++){
+                Message msgContainer = listMsgPool.get(i);
+                br.write(msgContainer.getSender() + "|" +
+                        msgContainer.getReceiver() + "|");
+                String content = msgContainer.getContent().replace("\n", "`");
+                br.write(content + "|" +
+                        msgContainer.getTimestamp() + "\n");
+            }
+            br.close();
+        } catch (IOException io){
+            io.printStackTrace();
         }
+    }
+
+    /**
+     * Add new messages
+     * @param content
+     */
+    public void addMessage(String sender, String content) {
+        int total = this.listMsgPool.size();
+        for(int i = 0; i < total; i++){
+            if(listMsgPool.get(i).getReceiver().equals(sender)){
+                String listContent = listMsgPool.get(i).getContent();
+                listContent += content + "\n";
+                listMsgPool.get(i).setContent(listContent);
+                return;
+            }
+        }
+        Message newUser = new Message(this.user,sender,content);
+        listMsgPool.add(newUser);
     }
 
     public List<Message> getMessages() {
@@ -51,6 +98,7 @@ public class ChatHistory {
                     String sender = parts[0];
                     String receiver = parts[1];
                     String content = parts[2];
+                    content = content.replace('`','\n');
                     LocalDateTime timestamp = LocalDateTime.parse(parts[3]);
 
                     Message message = new Message(sender, receiver, content);
@@ -64,7 +112,14 @@ public class ChatHistory {
         return messages;
     }
 
-    public void deleteMessage(int lineNumber) {
+    public void deleteMessage(String receiver, int lineNumber) {
+        for(int  i = 0; i < listMsgPool.size();i++){
+            if(listMsgPool.get(i).getReceiver().equals(receiver)){
+                String[] listContent = listMsgPool.get(i).getContent().split("\n");
+//                ArrayList<String> alContent = listContent;
+
+            }
+        }
         List<String> fileContent = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(chatFile))) {
             String line;
@@ -87,7 +142,4 @@ public class ChatHistory {
             e.printStackTrace();
         }
     }
-
-    // Other methods for managing chat history
-    // ...
 }

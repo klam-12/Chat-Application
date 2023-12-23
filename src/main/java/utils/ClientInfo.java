@@ -97,6 +97,12 @@ public class ClientInfo {
         this.serverListener = serverListener;
     }
 
+    public void setUp(BufferedReader br,BufferedWriter bw,Socket socket){
+        this.setBw(bw);
+        this.setBr(br);
+        this.setSocket(socket);
+    }
+
     public void close() {
         try{
             br.close();

@@ -1,2 +1,0 @@
-user_2|user_1|bônjour bạn yêu dấu|2023-12-12T21:26:21.782349600
-user_2|user_1|xinchao bạn yêu dấu|2023-12-12T21:26:21.782349600

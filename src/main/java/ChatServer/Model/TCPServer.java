@@ -20,13 +20,11 @@ public class TCPServer extends Thread {
     private ArrayList<TalkingThread> listRooms;
     int roomID; // increase everytime new room is created
     boolean flagRun;
-    int TIME_OUT = 5000;
     private GroupListener groupListener;
 
     public TCPServer(){
         try {
             serSoc = new ServerSocket(3200);
-//            serSoc.setSoTimeout(TIME_OUT);
         } catch (IOException io){
             System.out.println("Connection: " + io.getMessage());
         }
@@ -183,12 +181,6 @@ public class TCPServer extends Thread {
             listOnlineUsers.get(i).close();
         }
 
-        // remove rooms
-//        int numRooms = this.listRooms.size();
-//        for(int i = 0; i < numRooms; i++){
-//            this.listRooms.remove(i);
-//        }
-
         try {
             this.serSoc.close();
             System.out.println("Close server");
@@ -256,13 +248,10 @@ public class TCPServer extends Thread {
                         }
                     }
 
+                    clientInfo.setUp(br,bw,skClient);
                     // Announce to all online users
                     message = "NewUser`" + clientInfo.getTenTK();
                     bossManager.sendMsgToAll(message);
-
-                    clientInfo.setBr(br);
-                    clientInfo.setBw(bw);
-                    clientInfo.setSocket(skClient);
 
                     ServerSender serverSender = new ServerSender(bossManager);
                     serverSender.start();
@@ -272,7 +261,6 @@ public class TCPServer extends Thread {
                     serverListener.start();
                     clientInfo.setServerListener(serverListener);
                     bossManager.addClientToList(clientInfo);
-
 
                     System.out.println("Client " + tdn + " has arrived at " + clientInfo.getSocket().getPort());
                     System.out.println("Waiting for a client");
@@ -303,7 +291,7 @@ public class TCPServer extends Thread {
         {
             do {
                 try {
-                    Socket skClient = serSoc.accept(); //synchronous
+                    Socket skClient = serSoc.accept();
                     handleComingUser(skClient);
                 }
                 catch (SocketException se){

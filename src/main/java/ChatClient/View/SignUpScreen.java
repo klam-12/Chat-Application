@@ -72,8 +72,6 @@ public class SignUpScreen extends JFrame {
                 //Zero out the possible password, for security.
                 Arrays.fill(password, '0');
 
-//              inputPass.selectAll()
-
                 // Nhận message từ server sau khi server đã kiểm tra TDN có tồn tại?
                 if(receiver.getReceivedMessage().equals("Valid")){
                     dispose();

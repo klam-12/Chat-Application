@@ -1,9 +1,6 @@
 package ChatClient.Controller;
 
-import ChatClient.Model.ClientSender;
 import ChatClient.View.ClientUI;
-import utils.Message;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -35,6 +32,8 @@ public class ChatListener implements ActionListener {
                 break;
             case "File":
                 this.clientUI.sendFile(listChatFriends);
+                break;
+            case "History":
                 break;
             default:
                 System.out.println("No button choosen.");

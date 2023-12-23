@@ -90,7 +90,6 @@ public class ReceiverListener {
         // format: SendFile`sender`totalByte`filename
         System.out.println("Receiving file");
         String[] list = receivedMessage.split("`");
-
         this.addNewMessage(list[1]+"`Gửi file " + list[3]);
 
         String dirPath = this.clientUI.saveFileReceived(list[3]);

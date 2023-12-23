@@ -49,6 +49,7 @@ public class ServerUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 serverController.start();
+                btnStart.setEnabled(false);
             }
         });
 

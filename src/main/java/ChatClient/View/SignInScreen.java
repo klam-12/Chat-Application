@@ -137,8 +137,4 @@ public class SignInScreen extends JFrame {
         this.add(btnSU,gbc);
 
     }
-
-//    public static void main(String[] args) {
-//        SignInScreen signIn = new SignInScreen();
-//    }
 }

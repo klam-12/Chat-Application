@@ -1,6 +1,7 @@
 package ChatClient.Model;
 
 import ChatServer.Model.TCPServer;
+import utils.ChatHistory;
 import utils.Message;
 
 import javax.swing.*;
@@ -131,7 +132,6 @@ public class TCPClient {
         try {
         // Send file to the server
         OutputStream fileOutputStream = socket.getOutputStream();
-//        File fileToSend = new File("test.txt"); // Replace file_to_send.txt with the actual file path
         FileInputStream fileInputStream = new FileInputStream(selectedFile);
         byte[] buffer = new byte[1024];
         int bytesRead;
@@ -151,4 +151,5 @@ public class TCPClient {
             throw new RuntimeException(e);
         }
     }
+
 }

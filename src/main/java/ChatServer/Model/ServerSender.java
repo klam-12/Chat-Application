@@ -59,11 +59,11 @@ public class ServerSender extends Thread{
      * @param message is content
      */
     public void sendMessageToAPerson(String sender, String receiver , String message){
-        ClientInfo ci = this.roomManager.findClient(receiver);
-        if (ci != null) {
+        ClientInfo rec = this.roomManager.findClient(receiver);
+        if (rec != null) {
             try{
                 String sending = sender + "`" + message;
-                BufferedWriter bw = ci.getBw();
+                BufferedWriter bw = rec.getBw();
                 bw.write(sending);
                 bw.newLine();
                 bw.flush();
@@ -106,10 +106,6 @@ public class ServerSender extends Thread{
                 System.out.println(io.getMessage());
             }
         }
-    }
-
-    public void close() {
-
     }
 
     @Override
